@@ -85,6 +85,18 @@ textarea{width:100%;min-height:130px;border:1.5px solid var(--line);border-radiu
 .opt.ok{background:#1f8a5b;color:#fff;border-color:#1f8a5b}.opt.no{background:var(--red);color:#fff;border-color:var(--red)}
 .score{font-size:14px;color:var(--mute)}
 .note{font-size:13px;color:var(--mute);margin:18px 2px}
+.spgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.spi{border-radius:10px;padding:6px 4px;text-align:center;font-size:13px}
+.spi b{display:block;font-size:13px}.spi span{font-size:18px;font-weight:700}
+.sp2{background:#1f8a5b;color:#fff}.sp1{background:light-dark(#f3d27a,#8a6d1f);color:light-dark(#3a2c00,#fff)}.sp0{background:light-dark(#eceff0,#26302e);color:var(--mute)}
+.spkey{font-size:13px;color:var(--mute);margin-top:6px}
+.sec.spec{border-left:4px solid #1f8a5b}
+.spec summary{cursor:pointer;min-height:32px;list-style-position:inside}
+table.spt{border-collapse:collapse;font-size:13px;width:100%}
+.spt th,.spt td{padding:5px 4px;text-align:center;border-bottom:1px solid var(--line);white-space:nowrap}
+.spt td:first-child,.spt th:first-child{text-align:left;position:sticky;left:0;background:var(--card)}
+.spt tr[data-id]{cursor:pointer}
+.sp{display:inline-block;width:24px;height:24px;line-height:24px;border-radius:6px;font-weight:700}
 .empty{text-align:center;color:var(--mute);padding:40px 10px}
 @media(max-width:420px){.panel .e{font-size:32px}.panel p{font-size:15px}}
 @media(prefers-reduced-motion:reduce){.panel{transform:none}}
@@ -214,6 +226,36 @@ const R=[
 ];
 const D=R.map((r,i)=>{const[t,a,e]=r[4].split("|");return{id:i,slug:r[0].toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,""),g:r[0],b:r[1],c:r[2],cat:r[3],t,a,e,mech:r[5],use:r[6],dose:r[7],se:r[8],ci:r[9],int:r[10],mon:r[11],hx:r[12],ask:r[13],mn:r[14],sk:r[15].split("|").map(s=>{const k=s.indexOf(" ");return[s.slice(0,k),s.slice(k+1)]})}});
 const ALIAS={acetaminophen:"Paracetamol",frusemide:"Furosemide",trihexyphenidyl:"Benzhexol",gtn:"Nitrates",ismn:"Nitrates",isosorbide:"Nitrates",esomeprazole:"Omeprazole",pantoprazole:"Omeprazole",lansoprazole:"Omeprazole",rabeprazole:"Omeprazole",ranitidine:"Famotidine",budesonide:"Inhaled",beclometasone:"Inhaled",beclomethasone:"Inhaled",fluticasone:"Inhaled",seretide:"Inhaled",symbicort:"Inhaled",empagliflozin:"SGLT2",dapagliflozin:"SGLT2",gabapentin:"Pregabalin",rifampicin:"Anti-TB",isoniazid:"Anti-TB",pyrazinamide:"Anti-TB",ethambutol:"Anti-TB",cloxacillin:"Flucloxacillin",penicillin:"Benzylpenicillin",insulin:"Insulin",mixtard:"Insulin",actrapid:"Insulin",epinephrine:"Adrenaline",chlorpheniramine:"Chlorphenamine",procyclidine:"Benzhexol",theophylline:"Aminophylline",aminophylline:"Aminophylline",hctz:"Hydrochlorothiazide",cephalexin:"Cefalexin",ceftriaxon:"Ceftriaxone",acyclovir:"Aciclovir",epilim:"Sodium valproate",valproate:"Sodium valproate",thyroxine:"Levothyroxine",iron:"Ferrous",ferrous:"Ferrous",mgso4:"Magnesium",magnesium:"Magnesium",txa:"Tranexamic"};
+// Spectrum: Strep, MSSA, MRSA, Enterococcus, Gram-neg (E. coli/Enterobacterales), Pseudomonas, Anaerobes, Atypicals. 2 good, 1 partial/variable, 0 none
+const SPC=[["Strep","Streptococci (incl. pneumococcus)"],["MSSA","Staph aureus (MSSA)"],["MRSA","MRSA"],["Ent","Enterococcus"],["GNR","Gram −ve rods (E. coli, Klebsiella)"],["Pseudo","Pseudomonas"],["Anaer","Anaerobes"],["Atyp","Atypicals (Mycoplasma, Chlamydia, Legionella)"]];
+const SPEC={
+"Amoxicillin":["22",[2,0,0,2,1,0,1,0],"Also: Listeria, H. influenzae (non-β-lactamase), H. pylori. Destroyed by staph penicillinase. E. coli resistance is common."],
+"Co-amoxiclav":["",[2,2,0,2,1,0,2,0],"Also: H. influenzae, Moraxella, bite organisms (Pasteurella). Not ESBL, not Pseudomonas. Local E. coli resistance is high."],
+"Flucloxacillin / Cloxacillin":["",[1,2,0,0,0,0,0,0],"Narrow: MSSA first choice. Some streptococcal cover (add penicillin for severe strep cellulitis)."],
+"Benzylpenicillin":["",[2,0,0,1,0,0,1,0],"Also: Leptospira, Neisseria meningitidis, Treponema pallidum, Clostridium, Actinomyces."],
+"Cefalexin":["",[2,2,0,0,1,0,0,0],"Oral 1st generation: skin and urinary isolates. No enterococcal cover (all cephalosporins)."],
+"Cefuroxime":["",[2,1,0,0,1,0,0,0],"Also: H. influenzae, Moraxella, Neisseria gonorrhoeae (some), Borrelia."],
+"Ceftriaxone":["",[2,1,0,0,2,0,0,0],"Also: Neisseria (meningitis, gonorrhoea), Salmonella typhi, Leptospira, Borrelia, H. influenzae. Not ESBL, not Pseudomonas, not Listeria."],
+"Azithromycin":["",[1,1,0,0,0,0,0,2],"Also: Chlamydia, Mycoplasma, Legionella, Orientia (scrub typhus), Campylobacter, Salmonella (typhoid, some), H. influenzae. Pneumococcal resistance is common."],
+"Clarithromycin":["",[1,1,0,0,0,0,0,2],"Also: H. pylori, Mycoplasma, Legionella, Chlamydia, atypical mycobacteria (MAC)."],
+"Doxycycline":["",[1,1,1,0,1,0,0,2],"Also: Rickettsia & Orientia (scrub typhus), Leptospira, Borrelia, Chlamydia, Brucella, Coxiella, malaria prophylaxis. Some community MRSA."],
+"Ciprofloxacin":["",[0,1,0,0,2,2,0,1],"Also: Salmonella (high resistance in South Asia), Shigella, Campylobacter, Legionella. Weak pneumococcal cover (levofloxacin/moxifloxacin better)."],
+"Metronidazole":["",[0,0,0,0,0,0,2,0],"Also: C. difficile, Entamoeba histolytica, Giardia, Trichomonas, BV organisms, H. pylori. Combine with an aerobic agent for mixed infection."],
+"Gentamicin":["",[0,1,0,0,2,2,0,0],"Gram-negative aerobes incl. Pseudomonas. Synergy only with penicillins for strep, enterococcus and staph endocarditis. No anaerobes."],
+"Vancomycin":["",[2,2,2,2,0,0,1,0],"Gram-positives only, incl. MRSA and C. difficile (oral). Not VRE. No Gram-negative cover."],
+"Meropenem":["",[2,2,0,1,2,2,2,0],"Covers ESBL organisms. Not MRSA, VRE, atypicals or Stenotrophomonas. Carbapenem-resistant Enterobacterales (CRE) are emerging – reserve drug."],
+"Co-trimoxazole":["",[1,2,1,0,1,0,0,0],"Also: Pneumocystis (PCP), Toxoplasma, Nocardia, Stenotrophomonas, Listeria. Urinary E. coli resistance is high."],
+"Nitrofurantoin":["",[0,1,0,2,2,0,0,0],"Urine only (no blood or kidney levels). E. coli, Enterococcus faecalis, Staph saprophyticus. Proteus and Pseudomonas resistant."],
+"Fluconazole":["x",null,"Fungi: Candida albicans, C. tropicalis, C. parapsilosis, Cryptococcus. Weak/no cover: C. glabrata (variable), C. krusei (resistant), Aspergillus, Mucor."],
+"Aciclovir":["x",null,"Viruses: HSV-1, HSV-2, VZV. Weak CMV and EBV activity (use ganciclovir for CMV)."],
+"Anti-TB (RHZE)":["x",null,"Mycobacterium tuberculosis. Rifampicin also kills Staph aureus, Brucella, Neisseria meningitidis (prophylaxis). Check drug-susceptibility (GeneXpert for rifampicin resistance)."]};
+const spLev=["None","Partial / variable","Good"];
+const spCell=v=>`<span class="sp sp${v}" title="${spLev[v]}">${["–","±","✓"][v]}</span>`;
+function specHTML(d){const s=SPEC[d.g];if(!s)return"";
+  const grid=s[1]?`<div class="spgrid">${SPC.map((c,i)=>`<div class="spi sp${s[1][i]}"><b>${c[0]}</b><span>${["–","±","✓"][s[1][i]]}</span></div>`).join("")}</div><div class="spkey">✓ good · ± partial/variable · – none</div>`:"";
+  return `<div class="sec spec"><h3>🎯 Spectrum</h3>${grid}<p style="margin-top:8px">${esc(s[2])}</p><p class="note" style="margin:8px 0 0">Resistance varies by hospital. Follow your local antibiogram and the Sri Lanka College of Microbiologists antibiotic guidelines.</p></div>`}
+function specTable(){const rows=D.filter(d=>SPEC[d.g]&&SPEC[d.g][1]);
+  return `<details class="sec spec" id="spt"><summary><b>📊 Compare antibiotic spectrum</b></summary><div class="scroll" style="margin-top:10px"><table class="spt"><thead><tr><th>Drug</th>${SPC.map(c=>`<th title="${c[1]}">${c[0]}</th>`).join("")}</tr></thead><tbody>${rows.map(d=>`<tr data-id="${d.id}"><td>${esc(d.g.split(" /")[0])}</td>${SPEC[d.g][1].map(v=>`<td>${spCell(v)}</td>`).join("")}</tr>`).join("")}</tbody></table></div><div class="spkey">✓ good · ± partial/variable · – none · Tap a row to open the drug. Strep = streptococci; Ent = enterococcus; GNR = Gram −ve rods; Atyp = atypicals.</div></details>`}
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 let fav=new Set();try{fav=new Set(JSON.parse(localStorage.getItem("wdp-fav")||"[]"))}catch(e){}
@@ -232,7 +274,7 @@ function render(){
     let arr=D.filter(d=>(cat==="ALL"||d.cat===cat)&&(!q||hay(d).includes(q)));
     if(q){const al=Object.keys(ALIAS).find(k=>q.includes(k)||k.startsWith(q));if(al){const t=ALIAS[al].toLowerCase();D.forEach(d=>{if(d.g.toLowerCase().startsWith(t)&&!arr.includes(d))arr.unshift(d)})}
       arr.sort((x,y)=>(y.g.toLowerCase().startsWith(q)?2:y.b.toLowerCase().includes(q)?1:0)-(x.g.toLowerCase().startsWith(q)?2:x.b.toLowerCase().includes(q)?1:0))}
-    m.innerHTML=listView(arr,"No match. Try the generic name or a brand.")+`<p class="note">For learning and quick reference only. Doses are typical adult doses from BNF/NICE/RCOG-style guidance. Always confirm with the BNF, the Sri Lanka National Formulary and local unit protocols. Brand names vary between pharmacies – check NMRA listings.</p>`;
+    m.innerHTML=(cat==="AB"&&!q?specTable():"")+listView(arr,"No match. Try the generic name or a brand.")+`<p class="note">For learning and quick reference only. Doses are typical adult doses from BNF/NICE/RCOG-style guidance. Always confirm with the BNF, the Sri Lanka National Formulary and local unit protocols. Brand names vary between pharmacies – check NMRA listings.</p>`;
   }else if(view==="fav"){
     m.innerHTML=`<h2 style="margin:6px 0 4px">★ Saved drugs</h2>`+listView(D.filter(d=>fav.has(d.slug)),"Nothing saved yet. Tap ☆ on a drug card to save it for rounds.");
   }else if(view==="hx"){
@@ -266,6 +308,7 @@ function openDrug(slug){const d=D.find(x=>x.slug===slug);if(!d)return;const sh=$
   <div class="quick"><div class="lab">ROUNDS QUICK CARD</div><div><b>Used for:</b> ${esc(d.use)}</div><div class="lab">Dose</div><div>${esc(d.dose)}</div><div class="lab">Watch for</div><div>${esc(d.se)}</div></div>
   <div class="sketch"><h3>✏️ Sketch scene</h3>${panels(d)}<p class="mn">“${esc(d.mn)}”</p></div>
   <div class="flow"><h3 style="margin:0 0 8px;font-size:15px;color:var(--teal)">⚙️ How it works</h3><div class="fbox fdrug">${esc(d.g)}</div><div class="arr ${d.a}">${d.a==="b"?"⊣ BLOCKS / INHIBITS":"→ STIMULATES / ACTIVATES"}</div><div class="fbox ftgt">${rec(d.a)}<span>${esc(d.t)}</span></div><div class="arr">↓</div><div class="fbox feff">${esc(d.e)}</div><p style="margin:10px 2px 0;font-size:15px">${esc(d.mech)}</p></div>
+  ${specHTML(d)}
   <div class="sec hx"><h3>📝 In the history</h3><p><b>On this drug → think:</b> ${esc(d.hx)}</p><p style="margin-top:6px"><b>Ask:</b> ${esc(d.ask)}</p></div>
   ${sec("⛔ Contraindications",d.ci,"warn")}${sec("🔀 Interactions",d.int,"warn")}${sec("📊 Monitoring",d.mon)}
   <div class="sec"><h3>🏷️ Brands (Sri Lanka – verify locally)</h3><div class="brand">${d.b.split(/,\s*/).map(x=>`<span>${esc(x)}</span>`).join("")}</div></div>

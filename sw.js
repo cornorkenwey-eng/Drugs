@@ -1,4 +1,4 @@
-const CACHE = "wdp-v1";
+const CACHE = "wdp-v2";
 const FILES = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png", "./apple-touch-icon.png"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
@@ -8,6 +8,10 @@ self.addEventListener("activate", e => {
 });
 self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
+  if (e.request.mode === "navigate") {
+    e.respondWith(fetch(e.request).then(res => { const c = res.clone(); caches.open(CACHE).then(x => x.put("./index.html", c)); return res; }).catch(() => caches.match("./index.html")));
+    return;
+  }
   e.respondWith(
     caches.match(e.request).then(hit => hit || fetch(e.request).then(res => {
       if (res.ok || res.type === "opaque") {
